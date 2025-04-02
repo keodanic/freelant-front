@@ -1,10 +1,11 @@
-import { Text, View } from "react-native"
+import LoginFreela from "@/app/components/LoginFreela";
+import { Text, View,SafeAreaView,TextInput } from "react-native"
 
 
 const Login=()=>{
     return(
-        <View>
-            <Text className="text-red-600">Login</Text>
+        <View className="bg-zinc-400 h-full flex justify-center items-center p-20 pt-32 pb-32">
+            <LoginFreela/>
         </View>
     )
 }
