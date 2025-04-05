@@ -1,4 +1,4 @@
-import Routes from "../app/routes";
+import Routes from "./routes";
 import React from "react";
 
 

@@ -6,7 +6,11 @@ import PublicRoutes from "./publicroutes";
  const Routes=()=> {
     const user=false
   return (
-        <PublicRoutes/>
+
+    <PublicRoutes/>
+  
+    
+    
     
   )
 }
