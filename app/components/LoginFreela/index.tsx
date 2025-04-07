@@ -14,9 +14,7 @@ const LoginFreela = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setpassword] = useState<string>('');
     return (
-    <LinearGradient colors={["#777777","#5d5d5d"]}
-    style={{ borderRadius: 24, overflow: "hidden"}}>
-        <View className="h-full w-full p-10 flex gap-10 rounded-3xl">
+        <View className="h-full w-full p-10 flex gap-10 rounded-3xl justify-center">
             <View className="flex items-center">
                 <Image
                     source={require("@/assets/images/LOGO+TEXTO-cortado.png")}
@@ -51,7 +49,7 @@ const LoginFreela = () => {
 
             </View>
         </View>
-        </LinearGradient>
+        
     );
 }
 

@@ -1,8 +1,15 @@
 import Logo from "@/app/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {useRouter} from "expo-router"
+
 
 const Hello = () => {
+    const router=useRouter()
+
+const navigateToFreela=()=>{
+    router.push("/screens/Freela/Login")
+}
     return (
         <LinearGradient colors={['#5d5d5d', '#777777', '#5d5d5d']} >
             <View className="flex h-full p-6 gap-8" >
@@ -18,7 +25,7 @@ const Hello = () => {
                     </View>
                     <View className="flex gap-6">
                         <Text className="text-xl text-white">Escolha como você quer usar o app:</Text>
-                        <TouchableOpacity style={{ backgroundColor: '#B9B9B9' }} className="p-5 flex items-center justify-center rounded-2xl">
+                        <TouchableOpacity onPress={navigateToFreela} style={{ backgroundColor: '#B9B9B9' }} className="p-5 flex items-center justify-center rounded-2xl">
                             <Text className="text-2xl font-bold">Sou Freelancer</Text>
                             <Text className="text-xl">Oferecer meus serviços</Text>
                         </TouchableOpacity>

@@ -1,0 +1,61 @@
+import LoginFreela from "@/app/components/LoginFreela";
+import { Text, View,SafeAreaView,TextInput, Image, StyleSheet, TouchableOpacity } from "react-native"
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from "react";
+import {useRouter} from "expo-router"
+
+const styles = StyleSheet.create({
+    image: {
+        height: 100,
+        width: 80,
+
+    }
+})
+
+const Login=()=>{
+    const [email, setEmail] = useState<string>('');
+    const [password, setpassword] = useState<string>('');
+    const navigate=useRouter()
+    return(
+        <LinearGradient colors={['#5d5d5d','#777777']} >
+        <View className="h-full w-full p-10 flex gap-10 rounded-3xl justify-center">
+                   <View className="flex items-center">
+                       <Image
+                           source={require("@/assets/images/LOGO+TEXTO-cortado.png")}
+                           style={styles.image}
+                       />
+       
+                   </View>
+       
+                   <View>
+                       <Text>Email:</Text>
+                       <TextInput
+                           className="bg-slate-600 opacity-50 rounded-xl"
+                           placeholder="Email"
+                           value={email}
+                           onChangeText={setEmail} />
+                   </View>
+       
+                   <View>
+                       <Text>Senha:</Text>
+                       <TextInput
+                           className="bg-slate-600 opacity-50 rounded-xl"
+                           placeholder="Senha"
+                           value={password}
+                           onChangeText={setpassword} />
+       
+                   </View>
+                   <View className="flex items-center">
+                       <Text className="text-sm">Não tem conta na FREELANT?</Text>
+                       <TouchableOpacity onPress={()=>navigate.push("/screens/Freela/Cadastro")}>
+                           <Text className="text-blue-300 ">Venha trabalhar conosco</Text>
+                       </TouchableOpacity>
+       
+                   </View>
+               </View>
+
+        </LinearGradient>
+    )
+}
+
+export default Login;
