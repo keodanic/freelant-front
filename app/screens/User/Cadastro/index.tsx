@@ -4,8 +4,12 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { SafeAreaView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native"
 
-const Cadastro=()=>{
-const [fullName, setFullName] = useState('');
+const CadastroUser=()=>{
+    
+  const [name, setName] = useState('');
+  const [adress,SetAdress]= useState('')
+  const [phone,SetPhone]= useState('')
+  const [birthDay,SetBirthDay]= useState('')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
@@ -13,7 +17,7 @@ const [fullName, setFullName] = useState('');
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const router=useRouter()
   return (
-    
+    <LinearGradient colors={["#5d5d5d","#777777"]} className="flex-1">
     <View className="flex-1 bg-[#5d5d5d]">
       <StatusBar barStyle="light-content" />
       {/* Back button */}
@@ -39,8 +43,8 @@ const [fullName, setFullName] = useState('');
               className="bg-transparent text-white rounded-full px-4 py-3 border border-[#333333] mt-2"
               placeholder="Ferdinand Sinaga"
               placeholderTextColor="#777"
-              value={fullName}
-              onChangeText={setFullName}
+              value={name}
+              onChangeText={setName}
             />
           </View>
           
@@ -132,8 +136,8 @@ const [fullName, setFullName] = useState('');
         </View>
       </View>
     </View>
-    
+    </LinearGradient>
     )
 }
 
-export default Cadastro;
+export default CadastroUser;
