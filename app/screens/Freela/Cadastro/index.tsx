@@ -47,9 +47,6 @@ const CadastroUser = () => {
     if (!birthDay) {
       setmessageError('Por favor, insira sua Data de Nascimento.');
       return;
-    }else if (birthDay.length !== 11) {
-      setmessageError('Numero de telefone inválido.');
-      return;
     }
 
     if (!email) {
@@ -75,6 +72,8 @@ const CadastroUser = () => {
 
     setIsLoading(true);
     setmessageError('');
+
+    router.push('/screens/Freela/WorkClient')
   }
   return (
     <KeyboardAvoidingView
@@ -222,7 +221,7 @@ const CadastroUser = () => {
             onPress={handleRegister}
             disabled={isLoading}
           >
-            <Text className="text-[#fff] font-semibold text-lg">{isLoading ? <ActivityIndicator className="text-[#FF5238]" /> : 'Criar Conta Freelancer'}</Text>
+            <Text className="text-[#fff] font-semibold text-lg">Criar Conta Freelancer</Text>
           </TouchableOpacity>
 
           {/* Login Link */}
@@ -232,6 +231,7 @@ const CadastroUser = () => {
               <Text className="text-[#034DB5]">Log in</Text>
             </TouchableOpacity>
           </View>
+            {isLoading ? <ActivityIndicator className="text-[#FF5238]" /> : ''}
         </View>
       </View>
       </ScrollView>
