@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { api } from '@/app/services/api'; // ajuste o caminho conforme seu projeto
+import { api } from '@/app/services/api';
 
 export default function Teste() {
-const [userData, setUserData] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function testarAPI() {
       try {
-        const response = await api.get('/freelancers'); // ajuste para a rota que realmente existe
-        console.log('Resposta da API:', response.data);
+        const response = await api.get('/freelancers');
+        setUsers(response.data);
+        setErrorMsg(null);
       } catch (error) {
         if (error instanceof Error) {
-          console.error('Erro ao conectar com o backend:', error.message);
+          setErrorMsg(error.message);
         } else {
-          console.error('Erro desconhecido:', error);
+          setErrorMsg('Erro desconhecido');
         }
       }
     }
@@ -25,19 +26,18 @@ const [userData, setUserData] = useState<any>(null);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Dados do Usuário</Text>
+      <Text style={styles.title}>Lista de Usuários</Text>
 
       {errorMsg && <Text style={styles.error}>Erro: {errorMsg}</Text>}
 
-      {userData ? (
-        <View style={styles.card}>
-          {Object.entries(userData).map(([key, value]) => (
-            <Text key={key} style={styles.item}>
-              <Text style={styles.label}>{key}: </Text>
-              {String(value)}
-            </Text>
-          ))}
-        </View>
+      {users.length > 0 ? (
+        users.map((user) => (
+          <View key={user.id} style={styles.card}>
+            <Text style={styles.item}><Text style={styles.label}>Nome:</Text> {user.name}</Text>
+            <Text style={styles.item}><Text style={styles.label}>Email:</Text> {user.email}</Text>
+            <Text style={styles.item}><Text style={styles.label}>Categoria:</Text> {user.workCategory?.name}</Text>
+          </View>
+        ))
       ) : !errorMsg ? (
         <Text>Carregando...</Text>
       ) : null}
@@ -46,30 +46,30 @@ const [userData, setUserData] = useState<any>(null);
 }
 
 const styles = StyleSheet.create({
-    container: {
-      padding: 20,
-      alignItems: 'flex-start',
-    },
-    title: {
-      fontSize: 20,
-      marginBottom: 10,
-      fontWeight: 'bold',
-    },
-    card: {
-      backgroundColor: '#f0f0f0',
-      padding: 15,
-      borderRadius: 10,
-      width: '100%',
-    },
-    item: {
-      fontSize: 16,
-      marginBottom: 5,
-    },
-    label: {
-      fontWeight: 'bold',
-    },
-    error: {
-      color: 'red',
-      marginTop: 10,
-    },
-  });
+  container: {
+    padding: 20,
+    alignItems: 'stretch',
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  card: {
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  item: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  label: {
+    fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
+    marginTop: 10,
+  },
+});
