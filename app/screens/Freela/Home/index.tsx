@@ -1,7 +1,19 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View, Button, ScrollView, TouchableOpacity } from "react-native";
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+
+export type PublicStackParamList = {
+  Chat: {
+    senderId: string;
+    receiverId: string;
+  };
+  Home: undefined;
+};
+type NavigationProp = NativeStackNavigationProp<PublicStackParamList, 'Chat'>;
 const HomeFreelancer = () => {
+  const navigation = useNavigation<NavigationProp>();
   return (
     <ScrollView className="flex-1">
       <LinearGradient colors={['#5d5d5d','#777777']} className="min-h-screen p-4">
@@ -30,7 +42,12 @@ const HomeFreelancer = () => {
         </View>
       </View>
 
-      <TouchableOpacity className="bg-blue-600 rounded-xl p-4 items-center">
+      <TouchableOpacity  onPress={() =>
+    navigation.navigate("Chat", {
+      senderId: "b2d78785-c960-4c36-9e42-7f7b1e8c9ed7",
+      receiverId: "6f7064df-a511-4bda-a4f9-43336aa96e0d",
+    })
+  } className="bg-blue-600 rounded-xl p-4 items-center">
         <Text className="text-white text-base font-bold">Editar Perfil</Text>
       </TouchableOpacity>
       </LinearGradient>

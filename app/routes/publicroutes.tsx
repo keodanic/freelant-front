@@ -7,18 +7,33 @@ import Work from "../screens/Freela/WorkClient";
 import Teste from "../screens/Teste";
 import ChatScreen from "../screens/Chat";
 
+export type PublicStackParamList = {
+    Chat: {
+      senderId: string;
+      receiverId: string;
+    };
+    Home: undefined;
+    Teste: undefined;
+    Hello: undefined;
+    Work: undefined;
+    Cadastro: undefined;
+    Login: undefined;
+  };
+
+const Stack = createNativeStackNavigator<PublicStackParamList>();
+
 const PublicRoutes =()=> {
-    const {Navigator, Screen}= createNativeStackNavigator()
+
     return(
-        <Navigator>
-                <Screen name="Chat" component={ChatScreen} options={{headerShown:false}}/>
-                <Screen name="Home" component={Home} options={{headerShown:false}}/>
-                <Screen name="Teste" component={Teste} options={{headerShown:false}}/>
-                <Screen name="Hello" component={Hello} options={{headerShown:false}}/>
-                <Screen name="Work" component={Work} options={{headerShown:false}}/>
-                <Screen name="Cadastro" component={Cadastro} options={{headerShown:false}}/>
-                <Screen name="Login" component={Login} options={{headerShown:false}}/>
-        </Navigator>
+        <Stack.Navigator>
+                <Stack.Screen name="Home" component={Home} options={{headerShown:false}}/>
+                <Stack.Screen name="Chat" component={ChatScreen} options={{headerShown:false}}/>
+                <Stack.Screen name="Teste" component={Teste} options={{headerShown:false}}/>
+                <Stack.Screen name="Hello" component={Hello} options={{headerShown:false}}/>
+                <Stack.Screen name="Work" component={Work} options={{headerShown:false}}/>
+                <Stack.Screen name="Cadastro" component={Cadastro} options={{headerShown:false}}/>
+                <Stack.Screen name="Login" component={Login} options={{headerShown:false}}/>
+        </Stack.Navigator>
     )
 }
 

@@ -8,9 +8,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { RouteProp } from '@react-navigation/native'; 
 import io from 'socket.io-client';
 import axios from 'axios';
-
+ type PublicStackParamList = {
+  Chat: {
+    senderId: string;
+    receiverId: string;
+  };
+ }
 type Message = {
   id?: string;
   senderId: string;
@@ -19,28 +25,27 @@ type Message = {
   createdAt?: string;
 };
 
-const API_URL = 'http://192.168.0.X:3000'; // <- troque para o IP da sua máquina
+type Props = {
+  route: RouteProp<PublicStackParamList, 'Chat'>;
+};
+
+const API_URL = 'http://192.168.3.236:3000'; // <-- coloque seu IP local
 
 const socket = io(API_URL);
 
-export default function ChatScreen({
-  route,
-}: {
-  route: { params: { senderId: string; receiverId: string } };
-}) {
+export default function ChatScreen({ route }: Props) {
   const { senderId, receiverId } = route.params;
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    // Carrega histórico de mensagens
     axios
       .get(`${API_URL}/chat/${senderId}/${receiverId}`)
       .then((res) => setMessages(res.data))
       .catch((err) => console.error('Erro ao carregar mensagens:', err));
 
-    // Escuta novas mensagens recebidas
     socket.on('receive_message', (msg: Message) => {
       if (
         (msg.senderId === receiverId && msg.receiverId === senderId) ||
@@ -66,7 +71,6 @@ export default function ChatScreen({
     setMessages((prev) => [...prev, newMessage]);
     setMessage('');
 
-    // Scroll para a última
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
