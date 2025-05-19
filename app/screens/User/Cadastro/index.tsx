@@ -20,7 +20,7 @@ const CadastroUser=()=>{
     <LinearGradient colors={["#5d5d5d","#777777"]} className="flex-1">
     <View className="flex-1 bg-[#5d5d5d]">
       <StatusBar barStyle="light-content" />
-      {/* Back button */}
+      
       <TouchableOpacity 
         className="w-10 h-10 ml-4 mt-2 rounded-full bg-[#5d5d5d] items-center justify-center"
       >
@@ -28,13 +28,13 @@ const CadastroUser=()=>{
       </TouchableOpacity>
       
       <View className="px-6 mt-4">
-        {/* Header */}
+        
         <Text className="text-white text-3xl font-bold">Register</Text>
         <Text className="text-gray-400 mt-1 mb-8">Crie sua conta como Freelancer</Text>
         
-        {/* Form */}
+        
         <View className="space-y-4">
-          {/* Full Name Input with label on border */}
+          
           <View className="mb-4">
             <View className="absolute top-0 left-4 z-10 bg-[#5d5d5d] px-2">
               <Text className="text-[#fff] text-xs">Nome Completo</Text>
@@ -48,7 +48,7 @@ const CadastroUser=()=>{
             />
           </View>
           
-          {/* Email Input with label on border */}
+          
           <View className="mb-4">
             <View className="absolute top-0 left-4 z-10 bg-[#5d5d5d] px-2">
               <Text className="text-[#fff] text-xs">Email</Text>
@@ -64,7 +64,7 @@ const CadastroUser=()=>{
             />
           </View>
           
-          {/* Password Input with label on border */}
+         
           <View className="mb-4">
             <View className="absolute top-0 left-4 z-10 bg-[#5d5d5d] px-2">
               <Text className="text-[#fff] text-xs">Password</Text>
@@ -91,7 +91,7 @@ const CadastroUser=()=>{
             </View>
           </View>
           
-          {/* Repeat Password Input with label on border */}
+          
           <View className="mb-4">
             <View className="absolute top-0 left-4 z-10 bg-[#5d5d5d] px-2">
               <Text className="text-[#fff] text-xs">Repeat Password</Text>
@@ -119,7 +119,7 @@ const CadastroUser=()=>{
           </View>
         </View>
         
-        {/* Register Button */}
+       
         <TouchableOpacity 
           className="bg-[#252525] rounded-full py-4 items-center mt-4"
           onPress={() => console.log('Register pressed')}
@@ -127,7 +127,7 @@ const CadastroUser=()=>{
           <Text className="text-white font-semibold text-lg">Register</Text>
         </TouchableOpacity>
         
-        {/* Login Link */}
+        
         <View className="flex-row justify-center mt-6">
           <Text className="text-gray-400">I have account? </Text>
           <TouchableOpacity onPress={()=>router.push('/screens/Freela/Login')}>

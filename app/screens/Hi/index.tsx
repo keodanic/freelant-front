@@ -10,6 +10,9 @@ const Hello = () => {
 const navigateToFreela=()=>{
     router.push("/screens/Freela/Login")
 }
+const navigateToUser=()=>{
+    router.push("/screens/User/Cadastro")
+}
     return (
         <LinearGradient colors={['#5d5d5d', '#777777', '#5d5d5d']} >
             <View className="flex h-full p-6 gap-8" >
