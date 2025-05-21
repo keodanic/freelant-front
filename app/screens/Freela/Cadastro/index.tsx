@@ -36,40 +36,40 @@ const CadastroUser = () => {
   const { login } = useAuth();
 
   const handleRegister = async () => {
-    if (!name) return setmessageError('Por favor, insira seu nome.');
-    if (name.length < 10) return setmessageError('Insira seu nome completo.');
-    if (!adress) return setmessageError('Por favor, insira seu endereço.');
-    if (!birthDay) return setmessageError('Por favor, insira sua Data de Nascimento.');
-    if (!email) return setmessageError('Por favor, insira seu endereço de e-mail.');
-    if (!email.includes('@')) return setmessageError('Por favor, insira um e-mail válido.');
-    if (!password) return setmessageError('Por favor, insira sua senha.');
-    if (password.length < 8) return setmessageError('A senha deve ter no mínimo 8 caracteres.');
-    if (password !== repeatPassword) return setmessageError('As senhas não coincidem.');
+  if (!name) return setmessageError('Por favor, insira seu nome.');
+  if (name.length < 10) return setmessageError('Insira seu nome completo.');
+  if (!adress) return setmessageError('Por favor, insira seu endereço.');
+  if (!birthDay) return setmessageError('Por favor, insira sua Data de Nascimento.');
+  if (!email) return setmessageError('Por favor, insira seu endereço de e-mail.');
+  if (!email.includes('@')) return setmessageError('Por favor, insira um e-mail válido.');
+  if (!password) return setmessageError('Por favor, insira sua senha.');
+  if (password.length < 8) return setmessageError('A senha deve ter no mínimo 8 caracteres.');
+  if (password !== repeatPassword) return setmessageError('As senhas não coincidem.');
 
-    setIsLoading(true);
-    setmessageError('');
+  setIsLoading(true);
+  setmessageError('');
 
-    try {
-      await api.post('/auth-freela/register', {
+  try {
+   
+    router.push({
+      pathname: "/screens/Freela/WorkClient",
+      params: {
         name,
         email,
         password,
-        phone_number: phone,
-        date_birth: birthDay,
-        address: adress,
-      });
+        phone: phone,
+        birthDay,
+        adress,
+      },
+    });
+  } catch (error:any) {
+    const message = error?.response?.data?.message || 'Erro ao registrar. Tente novamente.';
+    setmessageError(message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-      // Login automático após cadastro
-      await login(email, password, 'freelancer');
-      router.push('/screens/Freela/WorkClient');
-
-    } catch (error: any) {
-      const message = error?.response?.data?.message || 'Erro ao registrar. Tente novamente.';
-      setmessageError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <KeyboardAvoidingView behavior="height" className="flex-1">
