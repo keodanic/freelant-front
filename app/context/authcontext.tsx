@@ -7,6 +7,7 @@ type AuthenticatedUser = {
   name: string;
   email: string;
   token: string;
+  profile_picture:string;
   type: 'user' | 'freelancer';
 };
 
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       const data = {
         id: response.data.id,
         name: response.data.name,
+        profile_picture: response.data.profile_picture,
         email: response.data.email,
         token: response.data.token,
         type,

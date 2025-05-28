@@ -22,7 +22,7 @@ const FreelancerProfile = () => {
       {/* Foto */}
       <View className="items-center mb-4">
         <Image
-          source={require("@/assets/images/avatar-default.png")}
+          source={require("@/assets/images/TEXTO-SF.png")}
           className="w-32 h-32 rounded-full mb-2"
         />
         <Text className="text-2xl font-bold text-center">{data.name}</Text>

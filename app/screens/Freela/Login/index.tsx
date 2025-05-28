@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       await login(email, password, "freelancer");
-      router.push("/screens/Freela/WorkClient");
+      router.push("/screens/Freela/Home");
     } catch (error: any) {
       setErrorMessage(error.message || "Erro ao fazer login.");
     } finally {
