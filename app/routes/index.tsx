@@ -1,18 +1,17 @@
-import { NavigationContainer } from "@react-navigation/native";
+import PublicRoutes from './publicroutes';
+import FreelancerRoutes from './freelancersroutes';
+import UserRoutes from './userroutes';
+import { useAuth } from '../hooks/Auth';
+import React from 'react';
 
-import PublicRoutes from "./publicroutes";
+const Routes = () => {
+  const { user } = useAuth();
 
+  if (!user?.token) return <PublicRoutes />;
+  if (user.type === 'freelancer') return <FreelancerRoutes />;
+  if (user.type === 'user') return <UserRoutes />;
 
- const Routes=()=> {
-    const user=false
-  return (
+  return null;
+};
 
-    <PublicRoutes/>
-  
-    
-    
-    
-  )
-}
-
-export default Routes
+export default Routes;
