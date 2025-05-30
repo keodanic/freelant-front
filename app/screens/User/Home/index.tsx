@@ -1,43 +1,97 @@
-import { Text, View, TextInput, Button, ScrollView, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
+import { api } from "@/app/services/api";
 
-const Home = () => {
+interface Freelancer {
+  id: string;
+  name: string;
+  profile_picture?: string;
+  workCategory: {
+    name: string;
+  };
+  ratings: {
+    rating: number;
+  }[];
+}
+
+const HomeUser = () => {
+  const router = useRouter();
+  const [search, setSearch] = useState('');
+  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchFreelancers = async () => {
+    setIsLoading(true);
+    try {
+      const res = await api.get(`/freelancers?search=${search}`);
+      setFreelancers(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar freelancers:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFreelancers();
+  }, []);
+
+  const calculateAverage = (ratings: { rating: number }[]) => {
+    if (!ratings.length) return "N/A";
+    const sum = ratings.reduce((acc, curr) => acc + Number(curr.rating), 0);
+    return (sum / ratings.length).toFixed(1);
+  };
+
   return (
     <ScrollView className="flex-1 bg-white p-4">
-      <Text className="text-2xl font-bold mb-4">Home</Text>
+      <Text className="text-2xl font-bold mb-4">Buscar Trabalhadores</Text>
 
       <View className="mb-6">
         <TextInput
-          placeholder="Buscar trabalhador ou serviço"
+          placeholder="Digite nome ou profissão"
+          value={search}
+          onChangeText={setSearch}
           className="border border-gray-300 rounded-lg p-2 mb-2"
         />
-        <Button title="Buscar" onPress={() => {}} />
+        <TouchableOpacity
+          className="bg-[#252525] rounded-lg py-2 items-center"
+          onPress={fetchFreelancers}
+        >
+          <Text className="text-white font-semibold">Buscar</Text>
+        </TouchableOpacity>
       </View>
 
-      <Text className="text-xl font-bold mt-6 mb-3">Categorias</Text>
-      <View className="flex-row justify-between">
-        <TouchableOpacity className="w-[48%] h-24 bg-gray-200 rounded-lg" />
-        <TouchableOpacity className="w-[48%] h-24 bg-gray-200 rounded-lg" />
-      </View>
+      <Text className="text-xl font-bold mb-3">Resultados</Text>
 
-      <Text className="text-xl font-bold mt-6 mb-3">Trabalhadores em destaque</Text>
-      <View className="mt-4">
-        <View className="flex-row items-center mb-4">
-          <View className="w-12 h-12 bg-gray-400 rounded-full mr-3" />
-          <View className="flex-1">
-            <Text className="font-bold text-base">Nome do Trabalhador</Text>
-            <Text className="text-gray-600">Serviço / Avaliação</Text>
-          </View>
-        </View>
-        <View className="flex-row items-center mb-4">
-          <View className="w-12 h-12 bg-gray-400 rounded-full mr-3" />
-          <View className="flex-1">
-            <Text className="font-bold text-base">Nome do Trabalhador</Text>
-            <Text className="text-gray-600">Serviço / Avaliação</Text>
-          </View>
-        </View>
-      </View>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#252525" />
+      ) : (
+        freelancers.map((freela) => (
+          <TouchableOpacity
+            key={freela.id}
+            onPress={() => router.push({ pathname: "/screens/Freela/FreelancerProfile", params: { id: freela.id } })}
+            className="flex-row items-center mb-4"
+          >
+            <Image
+              source={
+                freela.profile_picture
+                  ? { uri: freela.profile_picture }
+                  : require("@/assets/images/default-profile.jpg")
+              }
+              className="w-12 h-12 rounded-full mr-3"
+            />
+            <View className="flex-1">
+              <Text className="font-bold text-base">{freela.name}</Text>
+             <Text className="text-gray-600">
+  {freela.workCategory?.name || 'Sem categoria'} / {calculateAverage(freela.ratings ?? [])}
+</Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      )}
     </ScrollView>
   );
 };
 
-export default Home;
+export default HomeUser;

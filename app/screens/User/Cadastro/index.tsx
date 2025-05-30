@@ -33,6 +33,12 @@ const CadastroUsuario = () => {
   const router = useRouter();
   const { login } = useAuth();
 
+  // Converter "dd/MM/yyyy" para "yyyy-MM-dd"
+ const convertToISODate = (date: string): string => {
+  const [day, month, year] = date.split('/');
+  return new Date(`${year}-${month}-${day}T00:00:00.000Z`).toISOString();
+};
+
   const handleRegister = async () => {
     if (!name) return setMessageError('Por favor, insira seu nome.');
     if (name.length < 10) return setMessageError('Insira seu nome completo.');
@@ -48,12 +54,12 @@ const CadastroUsuario = () => {
     setMessageError('');
 
     try {
-      await api.post('/auth-user/register', {
+      await api.post('/user', {
         name,
         email,
         password,
         phone_number: phone,
-        date_birth: birthDay,
+        date_birth: convertToISODate(birthDay),
         address: adress,
       });
 
@@ -61,7 +67,7 @@ const CadastroUsuario = () => {
       router.push('/screens/User/Home');
 
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Erro ao registrar. Tente novamente.';
+      const message = error?.response?.data?.message ?? 'Erro ao criar conta. Verifique os campos e tente novamente.';
       setMessageError(message);
     } finally {
       setIsLoading(false);
@@ -83,7 +89,7 @@ const CadastroUsuario = () => {
               <Text className="text-[#413f3f] mt-1 mb-8">Crie sua conta como Cliente</Text>
 
               <View className="space-y-4">
-                {/* Nome Completo */}
+                {/* Nome */}
                 <View className="mb-4">
                   <View className="absolute top-0 left-4 z-10 bg-[#b9b9b9] px-2">
                     <Text className="text-[#252525] text-xs">Nome Completo</Text>
@@ -188,7 +194,7 @@ const CadastroUsuario = () => {
               <View className="flex-row justify-center mt-6">
                 <Text className="text-[#252525]">Já tem uma conta? </Text>
                 <TouchableOpacity onPress={() => router.push("/screens/User/Login")}>
-                  <Text className="text-[#034DB5]">Log in</Text>
+                  <Text className="text-[#034DB5]">Entrar</Text>
                 </TouchableOpacity>
               </View>
 

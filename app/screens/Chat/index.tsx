@@ -33,7 +33,7 @@ const API_URL = 'http://192.168.3.236:3000'; // <-- coloque seu IP local
 
 const socket = io(API_URL);
 
-export default function ChatScreen({ route }: Props) {
+const ChatScreen=({ route }: Props)=> {
   const { senderId, receiverId } = route.params;
 
   const [message, setMessage] = useState('');
@@ -117,3 +117,5 @@ export default function ChatScreen({ route }: Props) {
     </KeyboardAvoidingView>
   );
 }
+
+export default ChatScreen

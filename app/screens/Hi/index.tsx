@@ -11,7 +11,7 @@ const navigateToFreela=()=>{
     router.push("/screens/Freela/Login")
 }
 const navigateToUser=()=>{
-    router.push("/screens/User/Cadastro")
+    router.push("/screens/User/Login")
 }
     return (
         <LinearGradient colors={['#5d5d5d', '#777777', '#5d5d5d']} >
@@ -32,7 +32,7 @@ const navigateToUser=()=>{
                             <Text className="text-2xl font-bold">Sou Freelancer</Text>
                             <Text className="text-xl">Oferecer meus serviços</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ backgroundColor: '#252525' }} className="p-5 flex items-center justify-center rounded-2xl">
+                        <TouchableOpacity onPress={navigateToUser}  style={{ backgroundColor: '#252525' }} className="p-5 flex items-center justify-center rounded-2xl">
                             <Text className="text-white text-2xl font-bold">Sou Cliente</Text>
                             <Text className="text-white text-xl">Buscar Profissionais</Text>
                         </TouchableOpacity>
