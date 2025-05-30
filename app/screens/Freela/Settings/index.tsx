@@ -4,6 +4,8 @@ import { ScrollView, Text, TouchableOpacity, View, Image, Alert } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useAuth } from '@/app/hooks/Auth'; 
+import HeaderBack from '@/app/components/GoBack';
+import { router } from "expo-router";
 
 const Settings = () => {
   const { user } = useAuth(); // usuário logado (freelancer ou user)
@@ -71,6 +73,7 @@ const Settings = () => {
   return (
     <ScrollView className="flex-1">
       <LinearGradient colors={['#5d5d5d', '#777777']} className="min-h-screen p-4 items-center">
+         <HeaderBack onBackPress={() => router.back()} />
         <Text className="text-3xl text-white font-bold mb-6">Configurações</Text>
 
         {/* Foto de perfil */}
