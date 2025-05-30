@@ -1,4 +1,4 @@
-import { Text, View, SafeAreaView, TextInput, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, TextInput, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
 });
 
 const Login = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       await login(email, password, "freelancer");
-      router.push("/screens/Freela/Home");
+      router.push("/components/tabroutesFreela"); // ✅ vai para a stack com as tabs
     } catch (error: any) {
       setErrorMessage(error.message || "Erro ao fazer login.");
     } finally {
