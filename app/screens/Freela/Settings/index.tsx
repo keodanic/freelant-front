@@ -85,6 +85,7 @@ const Settings = () => {
         </View>
 
         {/* Botão para escolher imagem */}
+        <View className='flex gap-5'>
         <TouchableOpacity
           onPress={pickAndUploadImage}
           className="bg-black px-6 py-3 rounded-xl"
@@ -94,6 +95,18 @@ const Settings = () => {
             {uploading ? "Enviando..." : "Alterar foto de perfil"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+  className="bg-black px-6 py-3 rounded-xl flex items-center"
+  disabled={uploading}
+  onPress={() => router.push('/screens/Freela/EditFreelaProfile')}
+>
+  <Text className="text-white font-semibold">
+    Editar Perfil
+  </Text>
+</TouchableOpacity>
+
+
+        </View>
       </LinearGradient>
     </ScrollView>
   );

@@ -1,13 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeFreelancer from '@/app/screens/Freela/Home';
+import HomeUser from '@/app/screens/User/Home';
 import ChatList from '@/app/screens/ChatList';
-import Settings from '@/app/screens/Freela/Settings';
+import Settings from '@/app/screens/User/Settings';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
-const TabRoutesFreela=()=> {
+const TabRoutesUser=()=> {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -27,11 +27,11 @@ const TabRoutesFreela=()=> {
         },
       })}
     >
-      <Tab.Screen name="Início" component={HomeFreelancer} />
+      <Tab.Screen name="Início" component={HomeUser} />
       <Tab.Screen name="Chat" component={ChatList} />
       <Tab.Screen name="Configurações" component={Settings} />
     </Tab.Navigator>
   );
 }
 
-export default TabRoutesFreela
+export default TabRoutesUser
