@@ -1,55 +1,68 @@
 // context/UserContext.tsx
-import { createContext, useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { api } from '@/app/services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface AuthenticatedFreelancer {
+export interface AuthenticatedFreelancer {
   id: string;
   name: string;
   email: string;
+  profile_picture?: string;
   phone_number?: string;
   portfolio_link?: string;
-  profile_picture?: string;
   workCategory?: {
-    id: string;
     name: string;
   };
+  // outros campos que forem relevantes no backend
 }
 
-interface UserContextData {
+interface UserContextProps {
   freelancer: AuthenticatedFreelancer | null;
-  setFreelancer: (freelancer: AuthenticatedFreelancer | null) => void;
-  updateFreelancer: (data: Partial<AuthenticatedFreelancer>) => void;
+  updateFreelancer: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextData | undefined>(undefined);
+const UserContext = createContext<UserContextProps>({} as UserContextProps);
 
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [freelancer, setFreelancer] = useState<AuthenticatedFreelancer | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadFreelancer = async () => {
-      const data = await AsyncStorage.getItem("freelancerData");
-      if (data) setFreelancer(JSON.parse(data));
+    const loadUser = async () => {
+      const token = await AsyncStorage.getItem('@token');
+      if (!token) return;
+      setAuthToken(token);
+
+      try {
+        const res = await api.get('/freelancers/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFreelancer(res.data);
+      } catch (error) {
+        console.error('Erro ao carregar freelancer:', error);
+      }
     };
-    loadFreelancer();
+
+    loadUser();
   }, []);
 
-  const updateFreelancer = (data: Partial<AuthenticatedFreelancer>) => {
-    if (!freelancer) return;
-    const updated = { ...freelancer, ...data };
-    setFreelancer(updated);
-    AsyncStorage.setItem("freelancerData", JSON.stringify(updated));
+  const updateFreelancer = async () => {
+    if (!authToken) return;
+    try {
+      const res = await api.get('/freelancers/me', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setFreelancer(res.data);
+    } catch (error) {
+      console.error('Erro ao atualizar freelancer:', error);
+    }
   };
 
   return (
-    <UserContext.Provider value={{ freelancer, setFreelancer, updateFreelancer }}>
+    <UserContext.Provider value={{ freelancer, updateFreelancer }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = (): UserContextData => {
-  const context = useContext(UserContext);
-  if (!context) throw new Error("useUser deve ser usado dentro do UserProvider");
-  return context;
-};
+export const useUser = () => useContext(UserContext);
