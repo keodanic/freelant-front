@@ -1,37 +1,37 @@
-// ChatList.tsx
-import React, { useEffect, useState } from 'react';
+// app/screens/ChatList.tsx
+
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  Image,
-  StyleSheet,
   Alert,
-} from 'react-native';
-import { useAuth } from '@/app/hooks/Auth';
-import { api } from '@/app/services/api';
-import { useRouter } from 'expo-router';
+  StyleSheet,
+  Image,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useAuth } from "@/app/hooks/Auth";
+import { api } from "@/app/services/api";
 
-type ChatItemBackend = {
-  id: string;               // id da última mensagem (usamos como key)
-  receiverId: string;       // o “outro usuário” (quem bate papo com você)
-  userName: string;         // nome desse outro usuário
-  profile_picture?: string; // URL da foto, se houver
+type ChatItem = {
+  id: string;             // ID da última mensagem (usamos como key)
+  receiverId: string;     // ID do outro participante da conversa
+  userName: string;       // nome desse outro participante
+  profile_picture?: string;
 };
 
 const ChatList = () => {
-  const [chats, setChats] = useState<ChatItemBackend[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();      // pega o tipo (user ou freelancer) e o próprio ID
   const router = useRouter();
 
+  const [chats, setChats] = useState<ChatItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (authLoading) return;
+    // 1) Se ainda não tivermos o user carregado, nada a buscar
     if (!user?.id) {
-      console.warn('[ChatList] Usuário não autenticado ou user.id indefinido');
       setLoading(false);
       return;
     }
@@ -39,29 +39,37 @@ const ChatList = () => {
     const fetchChats = async () => {
       setLoading(true);
       try {
-        // Atenção: remova o '}' extra no final da query
-        const response = await api.get<ChatItemBackend[]>(
-          `/chat/list?userId=${user.id}&listForUser=false`
-        );
+        // 2) Monta a query string dependendo do tipo:
+        //    - usuário:   listForUser=true
+        //    - freelancer: listForUser=false
+        const listForUserFlag = user.type === "user" ? "true" : "false";
+        //    Ajuste abaixo caso seu backend use "listForFreela" em vez de inverter o booleano:
+        //    Exemplo: `/chat/list?userId=${user.id}&listForFreela=true`
+        const endpoint = `/chat/list?userId=${user.id}&listForUser=${listForUserFlag}`;
+
+        const response = await api.get<ChatItem[]>(endpoint);
         setChats(response.data);
-      } catch (error) {
-        console.error('[ChatList] Erro ao buscar chats:', error);
+      } catch (err) {
+        console.error("Erro ao buscar chats:", err);
+        Alert.alert("Erro", "Não foi possível carregar suas conversas.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchChats();
-  }, [authLoading, user?.id]);
+  }, [user?.id, user?.type]);
 
   const handlePress = (receiverId: string) => {
     if (!user?.id) {
-      Alert.alert('Erro', 'Usuário não autenticado.');
+      Alert.alert("Erro", "Usuário não autenticado.");
       return;
     }
-    // Navega para a tela de chat, passando senderId e receiverId como params
+    // 3) Ao clicar em uma conversa, navegamos para a tela de chat, passando os params:
+    //    - senderId = ID de quem está clicando (pode ser user ou freela)
+    //    - receiverId = ID do destinatário
     router.push({
-      pathname: '/screens/Chat',
+      pathname: "/screens/Chat",
       params: {
         senderId: user.id,
         receiverId,
@@ -69,23 +77,26 @@ const ChatList = () => {
     });
   };
 
-  if (authLoading || loading) {
+  // 4) Spinner enquanto carrega
+  if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#FF5238" />
-        <Text style={{ marginTop: 8, color: '#555' }}>Carregando conversas...</Text>
+        <ActivityIndicator size="large" color="#FFCB05" />
+        <Text style={styles.loadingText}>Carregando conversas...</Text>
       </View>
     );
   }
 
-  if (!chats.length) {
+  // 5) Se não houver conversas, mostramos texto de “nenhuma conversa”
+  if (chats.length === 0) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: '#555' }}>Você ainda não tem conversas.</Text>
+        <Text style={styles.emptyText}>Você ainda não tem conversas.</Text>
       </View>
     );
   }
 
+  // 6) Lista de conversas
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Suas Conversas</Text>
@@ -98,7 +109,10 @@ const ChatList = () => {
             onPress={() => handlePress(item.receiverId)}
           >
             {item.profile_picture ? (
-              <Image source={{ uri: item.profile_picture }} style={styles.avatar} />
+              <Image
+                source={{ uri: item.profile_picture }}
+                style={styles.avatar}
+              />
             ) : (
               <View style={[styles.avatar, styles.avatarPlaceholder]}>
                 <Text style={styles.avatarPlaceholderText}>
@@ -117,27 +131,35 @@ const ChatList = () => {
 
 export default ChatList;
 
+// ====== Estilos ======
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingTop: 24,
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
-    color: '#333',
+    color: "#333",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    color: "#555",
+  },
+  emptyText: {
+    color: "#555",
   },
   chatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 10,
   },
   avatar: {
@@ -147,21 +169,21 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarPlaceholder: {
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
   },
   avatarPlaceholderText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   chatName: {
     fontSize: 18,
-    color: '#333',
+    color: "#333",
   },
   separator: {
     height: 1,
-    backgroundColor: '#eee',
+    backgroundColor: "#eee",
   },
 });

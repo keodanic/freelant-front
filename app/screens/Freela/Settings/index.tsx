@@ -1,3 +1,4 @@
+// app/screens/Settings.tsx
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { ScrollView, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
@@ -8,7 +9,7 @@ import HeaderBack from '@/app/components/GoBack';
 import { router } from "expo-router";
 
 const Settings = () => {
-  const { user } = useAuth(); // usuário logado (freelancer ou user)
+  const { user, logout } = useAuth(); // destruture logout
   const [image, setImage] = useState<string | null>(user?.profile_picture || null);
   const [uploading, setUploading] = useState(false);
 
@@ -31,8 +32,8 @@ const Settings = () => {
       name: 'profile.jpg',
     } as any);
 
-    formData.append('upload_preset', 'freelant_upload'); // seu preset do Cloudinary
-    formData.append('cloud_name', 'dt5jto02v'); // seu cloud name
+    formData.append('upload_preset', 'freelant_upload');
+    formData.append('cloud_name', 'dt5jto02v');
 
     setUploading(true);
 
@@ -50,7 +51,6 @@ const Settings = () => {
       const imageUrl = res.data.secure_url;
       setImage(imageUrl);
 
-      // Envia pro backend para atualizar o usuário
       if (user?.type === 'freelancer') {
         await axios.put(`/freelancers/${user.id}`, {
           profile_picture: imageUrl,
@@ -70,10 +70,15 @@ const Settings = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/"); // volta para rota pública inicial
+  };
+
   return (
     <ScrollView className="flex-1">
       <LinearGradient colors={['#5d5d5d', '#777777']} className="min-h-screen p-4 items-center">
-         <HeaderBack onBackPress={() => router.back()} />
+        <HeaderBack onBackPress={() => router.back()} />
         <Text className="text-3xl text-white font-bold mb-6">Configurações</Text>
 
         {/* Foto de perfil */}
@@ -84,28 +89,37 @@ const Settings = () => {
           />
         </View>
 
-        {/* Botão para escolher imagem */}
-        <View className='flex gap-5'>
-        <TouchableOpacity
-          onPress={pickAndUploadImage}
-          className="bg-black px-6 py-3 rounded-xl"
-          disabled={uploading}
-        >
-          <Text className="text-white font-semibold">
-            {uploading ? "Enviando..." : "Alterar foto de perfil"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-  className="bg-black px-6 py-3 rounded-xl flex items-center"
-  disabled={uploading}
-  onPress={() => router.push('/screens/Freela/EditFreelaProfile')}
->
-  <Text className="text-white font-semibold">
-    Editar Perfil
-  </Text>
-</TouchableOpacity>
+        {/* Botões */}
+        <View className="flex gap-5">
+          <TouchableOpacity
+            onPress={pickAndUploadImage}
+            className="bg-black px-6 py-3 rounded-xl"
+            disabled={uploading}
+          >
+            <Text className="text-white font-semibold">
+              {uploading ? "Enviando..." : "Alterar foto de perfil"}
+            </Text>
+          </TouchableOpacity>
 
+          <TouchableOpacity
+            className="bg-black px-6 py-3 rounded-xl flex items-center"
+            disabled={uploading}
+            onPress={() => router.push('/screens/Freela/EditFreelaProfile')}
+          >
+            <Text className="text-white font-semibold">
+              Editar Perfil
+            </Text>
+          </TouchableOpacity>
 
+          {/* Botão de Logout */}
+          <TouchableOpacity
+            onPress={handleLogout}
+            className="bg-red-600 px-6 py-3 rounded-xl items-center"
+          >
+            <Text className="text-white font-semibold">
+              Sair
+            </Text>
+          </TouchableOpacity>
         </View>
       </LinearGradient>
     </ScrollView>

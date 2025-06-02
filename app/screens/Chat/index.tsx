@@ -10,12 +10,25 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import io, { Socket } from "socket.io-client";
 import { api } from "@/app/services/api";
 import { useAuth } from "@/app/hooks/Auth";
 
+// Tipo bruto que o servidor retorna (com campos Prisma)
+type RawMessage = {
+  id: string;
+  content: string;
+  createdAt: string;
+  senderUserId?: string | null;
+  senderFreelaId?: string | null;
+  receiverUserId?: string | null;
+  receiverFreelaId?: string | null;
+};
+
+// Tipo que o componente precisa
 type Message = {
   id: string;
   senderId: string;
@@ -26,16 +39,27 @@ type Message = {
 
 const SOCKET_URL = "http://192.168.3.236:3000";
 
+// Converte RawMessage → Message
+function normalize(raw: RawMessage): Message {
+  const senderId = raw.senderUserId ?? raw.senderFreelaId!;
+  const receiverId = raw.receiverUserId ?? raw.receiverFreelaId!;
+  return {
+    id: raw.id,
+    content: raw.content,
+    createdAt: raw.createdAt,
+    senderId,
+    receiverId,
+  };
+}
+
 const ChatScreen = () => {
-  // 1) Pega os parâmetros da URL
   const params = useLocalSearchParams<{ senderId: string; receiverId: string }>();
   const senderId = params.senderId;
   const receiverId = params.receiverId;
 
-  // 2) Pega o usuário logado (para passar token ao socket)
   const { user } = useAuth();
+  const isFreela = user?.type === "freelancer";
 
-  // 3) Estados
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,45 +67,41 @@ const ChatScreen = () => {
   const flatListRef = useRef<FlatList<Message>>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  // 4) Efeito principal: buscar histórico e conectar socket
   useEffect(() => {
-    console.log("💬 ChatScreen › params recebidos:", { senderId, receiverId });
-
-    // 4.1) Sem parâmetros válidos, mostra aviso e encerra
     if (!senderId || !receiverId) {
       Alert.alert("Erro", "Parâmetros de chat não informados.");
       setLoading(false);
       return;
     }
 
-    // 4.2) Carrega histórico de mensagens
+    // 1) Configure os parâmetros de rota para o GET, sempre passando userId primeiro
+    const userIdParam = isFreela ? receiverId : senderId;
+    const freelaIdParam = isFreela ? senderId : receiverId;
+
+    // Carrega histórico do banco usando a ordem correta
     setLoading(true);
     api
-      .get<Message[]>(`/chat/${senderId}/${receiverId}`)
+      .get<RawMessage[]>(`/chat/${userIdParam}/${freelaIdParam}`)
       .then((res) => {
-        console.log("✅ ChatScreen › histórico recebido:", res.data); 
-        setMessages(res.data);
+        const normalized = res.data.map(normalize);
+        setMessages(normalized);
       })
-      .catch((err) => {
-        console.error("❌ ChatScreen › erro ao carregar histórico:", err);
+      .catch(() => {
         Alert.alert("Erro", "Não foi possível carregar as mensagens.");
       })
       .finally(() => {
         setLoading(false);
       });
 
-    // 4.3) Conecta ao Socket.IO
+    // 2) Conecta ao Socket.IO
     const socket = io(SOCKET_URL, {
       auth: { token: user?.token },
     });
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      console.log("🔌 ChatScreen › socket conectado com id", socket.id);
-    });
-
-    socket.on("receive_message", (msg: Message) => {
-      console.log("📥 ChatScreen › recebeu no socket:", msg);
+    socket.on("receive_message", (rawMsg: RawMessage) => {
+      const msg = normalize(rawMsg);
+      // Adiciona somente se fizer parte desta conversa
       if (
         (msg.senderId === senderId && msg.receiverId === receiverId) ||
         (msg.senderId === receiverId && msg.receiverId === senderId)
@@ -91,14 +111,12 @@ const ChatScreen = () => {
     });
 
     return () => {
-      console.log("🧹 ChatScreen › cleanup: desconectando socket");
       socket.off("receive_message");
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [senderId, receiverId, user?.token]);
+  }, [senderId, receiverId, user?.token, isFreela]);
 
-  // 5) Quando “messages” mudar, rola a FlatList para o fim
   useEffect(() => {
     if (!loading && messages.length > 0 && flatListRef.current) {
       setTimeout(() => {
@@ -107,26 +125,34 @@ const ChatScreen = () => {
     }
   }, [messages, loading]);
 
-  // 6) Função para enviar mensagem
   const handleSend = () => {
     if (!message.trim() || !socketRef.current) return;
 
-    const newMsg: Message = {
-      id: Date.now().toString(),
+    socketRef.current.emit("send_message", {
+      content: message.trim(),
       senderId,
       receiverId,
-      content: message.trim(),
-      createdAt: new Date().toISOString(),
-    };
+      senderIsFreela: isFreela,
+    });
 
-    console.log("📤 ChatScreen › enviando mensagem via socket:", newMsg);
-    socketRef.current.emit("send_message", newMsg);
-
-    setMessages((prev) => [...prev, newMsg]);
     setMessage("");
   };
 
-  // 7) Spinner ou mensagem de erro:
+  // 3) Função para o usuário solicitar/abrir um novo serviço
+  const handleRequestService = async () => {
+    if (!user || !receiverId) return;
+    try {
+      await api.post("/services", {
+        user_id: user.id,
+        freelancer_id: receiverId,
+      });
+      Alert.alert("Sucesso", "Serviço solicitado com sucesso!");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Erro", "Não foi possível solicitar o serviço.");
+    }
+  };
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -136,7 +162,6 @@ const ChatScreen = () => {
     );
   }
 
-  // 8) Se ainda faltar algum parâmetro, exibe mensagem e não tenta seguir
   if (!senderId || !receiverId) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -145,7 +170,6 @@ const ChatScreen = () => {
     );
   }
 
-  // 9) Finalmente, a UI do chat funcional
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white"
@@ -154,7 +178,7 @@ const ChatScreen = () => {
       <FlatList
         ref={flatListRef}
         data={messages}
-        keyExtractor={(item, index) => item.id ?? index.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => {
           const isSender = item.senderId === senderId;
@@ -170,8 +194,17 @@ const ChatScreen = () => {
             </View>
           );
         }}
-        inverted={false}
       />
+
+      {/* Botão “Solicitar Serviço” só aparece para o cliente (user.type === 'user') */}
+      {user?.type === "user" && (
+        <TouchableOpacity
+          onPress={handleRequestService}
+          className="bg-green-600 rounded-xl py-3 mx-4 mb-2 items-center"
+        >
+          <Text className="text-white font-semibold">Solicitar Serviço</Text>
+        </TouchableOpacity>
+      )}
 
       <View className="flex-row items-center px-4 py-2 border-t border-gray-300 bg-white">
         <TextInput
