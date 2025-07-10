@@ -7,12 +7,10 @@ import React, {
   useCallback,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios, { AxiosError } from 'axios';
 import { api } from '../services/api';
 
 export type AuthenticatedUser = {
   id: string;
-  name: string;
   email: string;
   token: string;
   profile_picture?: string;
@@ -40,95 +38,44 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Interceptor para logout automático em 401
-  useEffect(() => {
-    const id = axios.interceptors.response.use(
-      (res) => res,
-      (error: AxiosError) => {
-        if (error.response?.status === 401) {
-          logout();
-        }
-        return Promise.reject(error);
-      }
-    );
-    return () => axios.interceptors.response.eject(id);
-  }, []);
-
-  // Carrega usuário salvo no AsyncStorage ao iniciar
+  // Carrega do AsyncStorage no bootstrap
   useEffect(() => {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
         if (raw) {
-          const parsed: AuthenticatedUser = JSON.parse(raw);
+          const parsed = JSON.parse(raw) as AuthenticatedUser;
           setUser(parsed);
-          api.defaults.headers.common['Authorization'] =
-            `Bearer ${parsed.token}`;
+          api.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
         }
-      } catch (err) {
-        console.error('Erro ao carregar usuário:', err);
+      } catch {
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  // Função de login unificada para usuários e freelancers
   const login = useCallback(
-    async (
-      email: string,
-      password: string,
-      type: 'user' | 'freelancer'
-    ) => {
+    async (email: string, password: string, type: 'user' | 'freelancer') => {
       setLoading(true);
       try {
-        const endpoint =
-          type === 'user' ? '/auth-user/login' : '/auth-freela/login';
+        const endpoint = type === 'user' ? '/auth-user/login' : '/auth-freela/login';
         const res = await api.post(endpoint, { email, password });
         const token: string = res.data.access_token;
-        const returned = type === 'user'
-          ? res.data.user
-          : res.data.freelancer;
+        const returned = type === 'user' ? res.data.user : res.data.freelancer;
 
-        // Monta objeto mínimo
         const minimal: AuthenticatedUser = {
           id: returned.id,
-          name: '',
           email: returned.email,
           token,
           type,
         };
 
-        // Seta header e armazena
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        await AsyncStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify(minimal)
-        );
-
-        // Busca perfil completo (nome e foto)
-        const profileUrl =
-          type === 'user' ? '/user/me' : '/freelancers/me';
-        const prof = await api.get<{
-          name: string;
-          profile_picture?: string;
-        }>(profileUrl);
-
-        const complete: AuthenticatedUser = {
-          ...minimal,
-          name: prof.data.name,
-          profile_picture: prof.data.profile_picture,
-        };
-
-        setUser(complete);
-        await AsyncStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify(complete)
-        );
-      } catch (error: any) {
-        const msg =
-          error.response?.data?.message ||
-          'Erro ao fazer login. Verifique suas credenciais.';
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
+        setUser(minimal);
+      } catch (err: any) {
+        const msg = err.response?.data?.message || 'Erro ao fazer login.';
         throw new Error(msg);
       } finally {
         setLoading(false);
@@ -137,7 +84,6 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     []
   );
 
-  // Função de logout
   const logout = useCallback(async () => {
     setUser(null);
     await AsyncStorage.removeItem(STORAGE_KEY);

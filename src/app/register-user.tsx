@@ -1,4 +1,3 @@
-// app/register-user.tsx
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -25,17 +24,23 @@ export default function RegisterUser() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
-  const [birthDay, setBirthDay] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
+  const [form, setForm] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    birthDay: '',
+    email: '',
+    password: '',
+    repeatPassword: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeat, setShowRepeat] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleChange = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
 
   const convertToISODate = (date: string): string => {
     const [day, month, year] = date.split('/');
@@ -43,6 +48,8 @@ export default function RegisterUser() {
   };
 
   const handleRegister = async () => {
+    const { name, address, birthDay, email, password, repeatPassword, phone } = form;
+
     if (!name) return setError('Por favor, insira seu nome.');
     if (name.length < 10) return setError('Insira seu nome completo.');
     if (!address) return setError('Por favor, insira seu endereço.');
@@ -55,6 +62,7 @@ export default function RegisterUser() {
 
     setError('');
     setLoading(true);
+    
     try {
       await api.post('/user', {
         name,
@@ -65,7 +73,6 @@ export default function RegisterUser() {
         address,
       });
       await login(email, password, 'user');
-      //router.push('/');
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
@@ -78,164 +85,181 @@ export default function RegisterUser() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <LinearGradient colors={['#5d5d5d', '#777777']} className="flex-1">
-          <StatusBar barStyle="light-content" />
-          <TouchableOpacity
-            className="m-4 w-10 h-10 rounded-xl items-center justify-center"
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#fff" />
-          </TouchableOpacity>
-
+        <LinearGradient 
+          colors={['#F8FAFC', '#E2E8F0', '#CBD5E1']}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          className="flex-1"
+        >
+          <StatusBar barStyle="dark-content" />
+          
           <ScrollView
             contentContainerStyle={{ padding: 24 }}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Text className="text-3xl font-bold text-white mb-2">
-              Crie sua conta
-            </Text>
-            <Text className="text-gray-200 mb-6">
-              Cadastre-se como Cliente
-            </Text>
-
-            {/* Nome */}
-            <View className="mb-4">
-              <Text className="text-xs text-gray-300 mb-1">Nome Completo</Text>
-              <TextInput
-                className="bg-gray-200 rounded-xl px-4 py-3"
-                placeholder="Nome completo"
-                placeholderTextColor="#777"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-
-            {/* Endereço */}
-            <View className="mb-4">
-              <Text className="text-xs text-gray-300 mb-1">Endereço</Text>
-              <TextInput
-                className="bg-gray-200 rounded-xl px-4 py-3"
-                placeholder="Endereço"
-                placeholderTextColor="#777"
-                value={address}
-                onChangeText={setAddress}
-              />
-            </View>
-
-            {/* Data de Nascimento */}
-            <View className="mb-4">
-              <InputBirthDate
-                value={birthDay}
-                onChange={setBirthDay}
-                onError={setError}
-              />
-            </View>
-
-            {/* Telefone */}
-            <View className="mb-4">
-              <InputPhoneNumber
-                value={phone}
-                onChange={setPhone}
-                onError={setError}
-              />
-            </View>
-
-            {/* Email */}
-            <View className="mb-4">
-              <Text className="text-xs text-gray-300 mb-1">Email</Text>
-              <TextInput
-                className="bg-gray-200 rounded-xl px-4 py-3"
-                placeholder="exemplo@gmail.com"
-                placeholderTextColor="#777"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            {/* Senha */}
-            <View className="mb-4">
-              <Text className="text-xs text-gray-300 mb-1">Senha</Text>
-              <View className="flex-row items-center bg-gray-200 rounded-xl">
-                <TextInput
-                  className="flex-1 px-4 py-3"
-                  placeholder="••••••••"
-                  placeholderTextColor="#777"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  className="px-4"
-                  onPress={() => setShowPassword((v) => !v)}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off' : 'eye'}
-                    size={20}
-                    color="#555"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Repetir Senha */}
-            <View className="mb-4">
-              <Text className="text-xs text-gray-300 mb-1">
-                Repetir Senha
-              </Text>
-              <View className="flex-row items-center bg-gray-200 rounded-xl">
-                <TextInput
-                  className="flex-1 px-4 py-3"
-                  placeholder="••••••••"
-                  placeholderTextColor="#777"
-                  secureTextEntry={!showRepeat}
-                  value={repeatPassword}
-                  onChangeText={setRepeatPassword}
-                />
-                <TouchableOpacity
-                  className="px-4"
-                  onPress={() => setShowRepeat((v) => !v)}
-                >
-                  <Ionicons
-                    name={showRepeat ? 'eye-off' : 'eye'}
-                    size={20}
-                    color="#555"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Erro */}
-            {error !== '' && (
-              <Text className="text-red-400 text-center mb-4">{error}</Text>
-            )}
-
-            {/* Botão Registrar */}
-            <TouchableOpacity
-              className="bg-black rounded-xl py-4 items-center"
-              onPress={handleRegister}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className="text-white font-semibold">
-                  Criar Conta de Usuário
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Link para login */}
-            <View className="flex-row justify-center mt-6">
-              <Text className="text-gray-200 mr-1">Já tem uma conta?</Text>
-              <TouchableOpacity onPress={() => router.push('/login-user')}>
-                <Text className="text-blue-300 font-medium">Entrar</Text>
+            {/* Header */}
+            <View className="mb-8">
+              <TouchableOpacity
+                className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center mb-4"
+                onPress={() => router.back()}
+              >
+                <Ionicons name="chevron-back" size={24} color="#4B5563" />
               </TouchableOpacity>
+              
+              <Text className="text-3xl font-bold text-gray-800 mb-1">
+                Cadastre-se
+              </Text>
+              <Text className="text-gray-600">
+                Crie sua conta como cliente
+              </Text>
+            </View>
+
+            {/* Formulário */}
+            <View className="space-y-4">
+              {/* Nome */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Nome Completo</Text>
+                <TextInput
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-800"
+                  placeholder="Digite seu nome completo"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.name}
+                  onChangeText={(text) => handleChange('name', text)}
+                />
+              </View>
+
+              {/* Endereço */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Endereço</Text>
+                <TextInput
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-800"
+                  placeholder="Rua, número - Bairro"
+                  placeholderTextColor="#9CA3AF"
+                  value={form.address}
+                  onChangeText={(text) => handleChange('address', text)}
+                />
+              </View>
+
+              {/* Data de Nascimento */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Data de Nascimento</Text>
+                <InputBirthDate
+                  value={form.birthDay}
+                  onChange={(text) => handleChange('birthDay', text)}
+                  onError={setError}
+                />
+              </View>
+
+              {/* Telefone */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Telefone</Text>
+                <InputPhoneNumber
+                  value={form.phone}
+                  onChange={(text) => handleChange('phone', text)}
+                  onError={setError}
+                />
+              </View>
+
+              {/* Email */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Email</Text>
+                <TextInput
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-800"
+                  placeholder="exemplo@gmail.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={form.email}
+                  onChangeText={(text) => handleChange('email', text)}
+                />
+              </View>
+
+              {/* Senha */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Senha</Text>
+                <View className="flex-row items-center bg-white border border-gray-300 rounded-lg">
+                  <TextInput
+                    className="flex-1 px-4 py-3 text-gray-800"
+                    placeholder="Mínimo 8 caracteres"
+                    placeholderTextColor="#9CA3AF"
+                    secureTextEntry={!showPassword}
+                    value={form.password}
+                    onChangeText={(text) => handleChange('password', text)}
+                  />
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() => setShowPassword(v => !v)}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="#6B7280"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Confirmar Senha */}
+              <View>
+                <Text className="text-gray-700 font-medium mb-1">Confirmar Senha</Text>
+                <View className="flex-row items-center bg-white border border-gray-300 rounded-lg">
+                  <TextInput
+                    className="flex-1 px-4 py-3 text-gray-800"
+                    placeholder="Digite novamente sua senha"
+                    placeholderTextColor="#9CA3AF"
+                    secureTextEntry={!showRepeat}
+                    value={form.repeatPassword}
+                    onChangeText={(text) => handleChange('repeatPassword', text)}
+                  />
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() => setShowRepeat(v => !v)}
+                  >
+                    <Ionicons
+                      name={showRepeat ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="#6B7280"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Mensagem de erro */}
+              {error && (
+                <View className="bg-red-50 p-3 rounded-lg border border-red-100">
+                  <Text className="text-red-600 text-center">{error}</Text>
+                </View>
+              )}
+
+              {/* Botão de registro */}
+              <TouchableOpacity
+                className="bg-blue-600 rounded-lg py-4 items-center justify-center mt-4 shadow-sm"
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="text-white font-bold text-lg">
+                    Criar Conta
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              {/* Link para login */}
+              <View className="flex-row justify-center mt-6">
+                <Text className="text-gray-600 mr-1">
+                  Já tem uma conta?
+                </Text>
+                <TouchableOpacity onPress={() => router.push('/login-user')}>
+                  <Text className="text-blue-600 font-semibold">Faça login</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </ScrollView>
         </LinearGradient>

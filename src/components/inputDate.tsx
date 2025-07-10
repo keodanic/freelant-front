@@ -78,7 +78,7 @@ const InputBirthDate = ({ value, onChange, onError }: InputBirthDateProps) => {
   return (
     <View className="mb-4">
       <View className="absolute top-0 left-4 z-10 bg-[#b9b9b9] px-2">
-        <Text className="text-[#252525] text-xs">Data de Nascimento</Text>
+    
       </View>
 
       <TextInputMask
